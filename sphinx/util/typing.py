@@ -364,7 +364,7 @@ def stringify(annotation: Any, mode: str = 'fully-qualified-except-typing') -> s
             return modprefix + '%s.%s' % (annotation.__module__, annotation.__name__)
         else:
             return annotation.__name__
-    elif not annotation:
+    elif annotation is False:
         return repr(annotation)
     elif annotation is NoneType:
         return 'None'
