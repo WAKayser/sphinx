@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from os import path
 from subprocess import PIPE, CalledProcessError
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from docutils import nodes
 from docutils.nodes import Element
@@ -34,7 +34,9 @@ templates_path = path.join(package_dir, 'templates', 'imgmath')
 class MathExtError(SphinxError):
     category = 'Math extension error'
 
-    def __init__(self, msg: str, stderr: str = None, stdout: str = None) -> None:
+    def __init__(
+        self, msg: str, stderr: Optional[str] = None, stdout: Optional[str] = None
+    ) -> None:
         if stderr:
             msg += '\n[stderr]\n' + stderr
         if stdout:
@@ -53,7 +55,7 @@ depthsvg_re = re.compile(r'.*, depth=(.*)pt')
 depthsvgcomment_re = re.compile(r'<!-- DEPTH=(-?\d+) -->')
 
 
-def read_svg_depth(filename: str) -> int:
+def read_svg_depth(filename: str) -> Optional[int]:
     """Read the depth from comment at last line of SVG file
     """
     with open(filename, encoding="utf-8") as f:
@@ -152,7 +154,7 @@ def convert_dvi_to_image(command: List[str], name: str) -> Tuple[str, str]:
         raise MathExtError('%s exited with error' % name, exc.stderr, exc.stdout) from exc
 
 
-def convert_dvi_to_png(dvipath: str, builder: Builder) -> Tuple[str, int]:
+def convert_dvi_to_png(dvipath: str, builder: Builder) -> Tuple[str, Optional[int]]:
     """Convert DVI file to PNG image."""
     tempdir = ensure_tempdir(builder)
     filename = path.join(tempdir, 'math.png')
@@ -178,7 +180,7 @@ def convert_dvi_to_png(dvipath: str, builder: Builder) -> Tuple[str, int]:
     return filename, depth
 
 
-def convert_dvi_to_svg(dvipath: str, builder: Builder) -> Tuple[str, int]:
+def convert_dvi_to_svg(dvipath: str, builder: Builder) -> Tuple[str, Optional[int]]:
     """Convert DVI file to SVG image."""
     tempdir = ensure_tempdir(builder)
     filename = path.join(tempdir, 'math.svg')
@@ -202,7 +204,7 @@ def convert_dvi_to_svg(dvipath: str, builder: Builder) -> Tuple[str, int]:
     return filename, depth
 
 
-def render_math(self: HTMLTranslator, math: str) -> Tuple[str, int]:
+def render_math(self: HTMLTranslator, math: str) -> Tuple[Optional[str], Optional[int]]:
     """Render the LaTeX math expression *math* using latex and dvipng or
     dvisvgm.
 

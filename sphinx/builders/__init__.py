@@ -89,10 +89,11 @@ class Builder:
             self.env: BuildEnvironment = env
             self.env.set_versioning_method(self.versioning_method,
                                            self.versioning_compare)
-        elif env is not Ellipsis:
+        else:
             # ... is passed by SphinxComponentRegistry.create_builder to not show two warnings.
             warnings.warn("The 'env' argument to Builder will be required from Sphinx 7.",
                           RemovedInSphinx70Warning, stacklevel=2)
+            self.env = None
         self.events: EventManager = app.events
         self.config: Config = app.config
         self.tags: Tags = app.tags
@@ -301,7 +302,9 @@ class Builder:
                        summary=__('targets for %d source files that are out of date') %
                        len(to_build))
 
-    def build(self, docnames: Iterable[str], summary: str = None, method: str = 'update') -> None:  # NOQA
+    def build(
+        self, docnames: Iterable[str], summary: Optional[str] = None, method: str = 'update'
+    ) -> None:
         """Main build method.
 
         First updates the environment, and then calls :meth:`write`.

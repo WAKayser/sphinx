@@ -101,7 +101,8 @@ class Config:
         'root_doc': (lambda config: config.master_doc, 'env', []),
         'source_suffix': ({'.rst': 'restructuredtext'}, 'env', Any),
         'source_encoding': ('utf-8-sig', 'env', []),
-        'exclude_patterns': ([], 'env', []),
+        'exclude_patterns': ([], 'env', [str]),
+        'include_patterns': (["**"], 'env', [str]),
         'default_role': (None, 'env', [str]),
         'add_function_parentheses': (True, 'env', []),
         'add_module_names': (True, 'env', []),
@@ -157,7 +158,9 @@ class Config:
         self.extensions: List[str] = config.get('extensions', [])
 
     @classmethod
-    def read(cls, confdir: str, overrides: Dict = None, tags: Tags = None) -> "Config":
+    def read(
+        cls, confdir: str, overrides: Optional[Dict] = None, tags: Optional[Tags] = None
+    ) -> "Config":
         """Create a Config object from configuration file."""
         filename = path.join(confdir, CONFIG_FILENAME)
         if not path.isfile(filename):
@@ -421,7 +424,7 @@ def correct_copyright_year(app: "Sphinx", config: Config) -> None:
                 config[k] = copyright_year_re.sub(replace, config[k])
 
 
-def check_confval_types(app: "Sphinx", config: Config) -> None:
+def check_confval_types(app: Optional["Sphinx"], config: Config) -> None:
     """Check all values for deviation from the default value's type, since
     that can result in TypeErrors all over the place NB.
     """

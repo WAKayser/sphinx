@@ -9,8 +9,9 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 
 try:
     import multiprocessing
+    HAS_MULTIPROCESSING = True
 except ImportError:
-    multiprocessing = None
+    HAS_MULTIPROCESSING = False
 
 from sphinx.errors import SphinxParallelError
 from sphinx.util import logging
@@ -33,7 +34,9 @@ class SerialTasks:
     def __init__(self, nproc: int = 1) -> None:
         pass
 
-    def add_task(self, task_func: Callable, arg: Any = None, result_func: Callable = None) -> None:  # NOQA
+    def add_task(
+        self, task_func: Callable, arg: Any = None, result_func: Optional[Callable] = None
+    ) -> None:
         if arg is not None:
             res = task_func(arg)
         else:
@@ -81,7 +84,9 @@ class ParallelTasks:
         logging.convert_serializable(collector.logs)
         pipe.send((failed, collector.logs, ret))
 
-    def add_task(self, task_func: Callable, arg: Any = None, result_func: Callable = None) -> None:  # NOQA
+    def add_task(
+        self, task_func: Callable, arg: Any = None, result_func: Optional[Callable] = None
+    ) -> None:
         tid = self._taskid
         self._taskid += 1
         self._result_funcs[tid] = result_func or (lambda arg, result: None)

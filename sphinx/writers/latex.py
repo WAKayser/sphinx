@@ -8,7 +8,7 @@ import re
 import warnings
 from collections import defaultdict
 from os import path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Set, Tuple, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, cast
 
 from docutils import nodes, writers
 from docutils.nodes import Element, Node, Text
@@ -172,7 +172,9 @@ class Table:
                 assert self.cells[(self.row + row, self.col + col)] == 0
                 self.cells[(self.row + row, self.col + col)] = self.cell_id
 
-    def cell(self, row: int = None, col: int = None) -> "TableCell":
+    def cell(
+        self, row: Optional[int] = None, col: Optional[int] = None
+    ) -> Optional["TableCell"]:
         """Returns a cell object (i.e. rectangular area) containing given position.
 
         If no option arguments: ``row`` or ``col`` are given, the current position;
@@ -387,9 +389,9 @@ class LaTeXTranslator(SphinxTranslator):
         self.context: List[Any] = []
         self.descstack: List[str] = []
         self.tables: List[Table] = []
-        self.next_table_colspec: str = None
+        self.next_table_colspec: Optional[str] = None
         self.bodystack: List[List[str]] = []
-        self.footnote_restricted: Element = None
+        self.footnote_restricted: Optional[Element] = None
         self.pending_footnotes: List[nodes.footnote_reference] = []
         self.curfilestack: List[str] = []
         self.handled_abbrs: Set[str] = set()
@@ -496,7 +498,7 @@ class LaTeXTranslator(SphinxTranslator):
         return renderer.render(template_name, variables)
 
     @property
-    def table(self) -> Table:
+    def table(self) -> Optional[Table]:
         """Get current table."""
         if self.tables:
             return self.tables[-1]
@@ -687,10 +689,10 @@ class LaTeXTranslator(SphinxTranslator):
         self.body.append('}')
 
     def visit_desc_signature(self, node: Element) -> None:
+        hyper = ''
         if node.parent['objtype'] != 'describe' and node['ids']:
-            hyper = self.hypertarget(node['ids'][0])
-        else:
-            hyper = ''
+            for id in node['ids']:
+                hyper += self.hypertarget(id)
         self.body.append(hyper)
         if not self.in_desc_signature:
             self.in_desc_signature = True
@@ -1185,7 +1187,7 @@ class LaTeXTranslator(SphinxTranslator):
         # self.body.append(r'\columnbreak\n')
         pass
 
-    def latex_image_length(self, width_str: str, scale: int = 100) -> str:
+    def latex_image_length(self, width_str: str, scale: int = 100) -> Optional[str]:
         try:
             return rstdim_to_latexdim(width_str, scale)
         except ValueError:

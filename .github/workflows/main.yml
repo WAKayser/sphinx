@@ -2,6 +2,9 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   ubuntu:
     runs-on: ubuntu-18.04
@@ -21,7 +24,7 @@ jobs:
         - python: "3.10"
           docutils: du18
         - python: "3.10"
-          docutils: du19pre
+          docutils: du19
         - python: "3.11-dev"
           docutils: py311
 
@@ -33,7 +36,7 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
     - name: Set up Python ${{ matrix.python }} (deadsnakes)
-      uses: deadsnakes/action@v2.0.1
+      uses: deadsnakes/action@v2.1.1
       if: "endsWith(matrix.python, '-dev')"
       with:
         python-version: ${{ matrix.python }}
